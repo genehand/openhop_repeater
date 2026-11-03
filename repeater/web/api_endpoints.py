@@ -1775,6 +1775,8 @@ class APIEndpoints:
                     config_yaml["sx1262"]["use_gpiod_backend"] = hw_config.get(
                         "use_gpiod_backend", False
                     )
+                if "rssi_offset_db" in hw_config:
+                    config_yaml["sx1262"]["rssi_offset_db"] = hw_config.get("rssi_offset_db", 0.0)
             # Explicit setup writes canonical names only.
             config_yaml = normalize_modem_config(config_yaml)
             config_yaml["setup_completed"] = True

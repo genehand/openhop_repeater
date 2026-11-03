@@ -795,6 +795,12 @@ def get_radio_for_board(board_config: dict):
             combined_config["use_gpiod_backend"] = spi_config["use_gpiod_backend"]
         if "radio_timing_delay" in spi_config:
             combined_config["radio_timing_delay"] = float(spi_config["radio_timing_delay"])
+        # Front-end RSSI correction for boards whose LNA sits ahead of the chip
+        # (e.g. E22P modules, which read every level high by the LNA gain). Only
+        # forwarded when configured, so an older openhop_core that does not
+        # accept the keyword is unaffected.
+        if "rssi_offset_db" in spi_config:
+            combined_config["rssi_offset_db"] = float(spi_config["rssi_offset_db"])
 
         # Always construct a fresh instance so multi-radio configs do not
         # share/reuse a singleton SX1262 handle.

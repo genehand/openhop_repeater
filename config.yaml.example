@@ -720,6 +720,19 @@ sx1262:
   # Waveshare hardware flag
   is_waveshare: false
 
+  # Front-end RSSI correction, in dB, added to every reported RSSI and
+  # noise-floor reading so levels are antenna-referred instead of chip-referred.
+  # Only needed when an LNA sits between the antenna and the SX1262: a module
+  # like the E22P-915M30S amplifies before the chip, so it reads about 17 dB
+  # high and an idle floor shows near -100 dBm instead of ~-120 dBm at 125 kHz.
+  # Set the negative of the front-end gain (e.g. -17.0) to put the numbers back
+  # on the antenna. Leave at 0.0 for a bare SX1262.
+  # SNR is never corrected -- it is gain-invariant, which is why decoding and
+  # link-margin decisions are unaffected either way. Apply the offset to both
+  # RSSI and the noise floor or to neither, or margins that mix the two skew.
+  # In a radios[] entry, set this per radio to keep each board's own value.
+  # rssi_offset_db: 0.0
+
 delays:
   # Flood TX delay: airtime multiplier, NOT seconds. The actual pre-transmit
   # delay is a random value in [0, 5 * packet_airtime * factor] seconds.

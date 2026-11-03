@@ -52,6 +52,68 @@ def test_get_radio_for_board_passes_en_pins(monkeypatch):
     assert "en_pin" not in captured_kwargs
 
 
+def _sx1262_board_config(**sx1262_extra):
+    return {
+        "radio_type": "sx1262",
+        "sx1262": {
+            "bus_id": 0,
+            "cs_id": 0,
+            "cs_pin": -1,
+            "reset_pin": 18,
+            "busy_pin": 5,
+            "irq_pin": 6,
+            "txen_pin": -1,
+            "rxen_pin": -1,
+            **sx1262_extra,
+        },
+        "radio": {
+            "frequency": 915000000,
+            "tx_power": 22,
+            "spreading_factor": 9,
+            "bandwidth": 125000,
+            "coding_rate": 5,
+            "preamble_length": 17,
+            "sync_word": 0x3444,
+        },
+    }
+
+
+def test_get_radio_for_board_forwards_rssi_offset(monkeypatch):
+    """An LNA board's antenna-referred correction reaches the driver as a float."""
+    captured_kwargs = {}
+
+    class _DummySX1262Radio(_DummyRadio):
+        def __init__(self, **kwargs):
+            captured_kwargs.update(kwargs)
+
+    monkeypatch.setattr(
+        "openhop_core.hardware.sx1262_wrapper.SX1262Radio",
+        _DummySX1262Radio,
+    )
+
+    get_radio_for_board(_sx1262_board_config(rssi_offset_db="-17.0"))
+
+    assert captured_kwargs["rssi_offset_db"] == pytest.approx(-17.0)
+
+
+def test_get_radio_for_board_omits_rssi_offset_when_unset(monkeypatch):
+    """Unset must stay unsent: an older openhop_core has no such keyword."""
+    captured_kwargs = {}
+
+    class _DummySX1262Radio(_DummyRadio):
+        def __init__(self, **kwargs):
+            captured_kwargs.update(kwargs)
+
+    monkeypatch.setattr(
+        "openhop_core.hardware.sx1262_wrapper.SX1262Radio",
+        _DummySX1262Radio,
+    )
+
+    get_radio_for_board(_sx1262_board_config())
+
+    assert "rssi_offset_db" not in captured_kwargs
+
+
 def test_get_radio_for_board_null_radio_type_returns_null_radio():
     radio = get_radio_for_board({"radio_type": None})
     assert type(radio).__name__ == "NullRadio"
